@@ -3,9 +3,27 @@ package main
 import "testing"
 
 func TestSearch(t *testing.T) {
-	dictionary := map[string]string{"test": "this is just a test"}
+	dictionary := Dictionary{"test": "this is just a test"}
 
-	got := Search(dictionary, "test")
+	t.Run("know word", func(t *testing.T) {
+		got, _ := dictionary.Search("test")
+		want := "this is just a test"
+
+		assertStrings(t, got, want)
+	})
+
+	t.Run("unknow word", func(t *testing.T) {
+		_, err := dictionary.Search("unknown")
+		want := "could not find the word you were looking for"
+
+		if err == nil {
+			t.Fatal("execpet to get an error")
+		}
+
+		assertStrings(t, err.Error(), want)
+	})
+
+	got, _ := dictionary.Search("test")
 	want := "this is just a test"
 
 	assertStrings(t, got, want)
