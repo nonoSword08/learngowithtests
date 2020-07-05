@@ -1,13 +1,19 @@
 package main
 
-import "errors"
+const (
+	ErrNotFound         = DictionaryErr("could not find the word you were looking for")
+	ErrWordExists       = DictionaryErr("cannot add word because it already exists")
+	ErrWordDoesNotExist = DictionaryErr("cannot update word because it does not exist")
+)
+
+type DictionaryErr string
+
+// implement error interface
+func (e DictionaryErr) Error() string {
+	return string(e)
+}
 
 type Dictionary map[string]string
-
-var (
-	ErrWordExists = errors.New("cannot add word because it already exists")
-	ErrNotFound = errors.New("could not find the word you were looking for")
-)
 
 func (d Dictionary) Search(word string) (string, error) {
 	definiton, ok := d[word]
@@ -19,16 +25,31 @@ func (d Dictionary) Search(word string) (string, error) {
 }
 
 func (d Dictionary) Add(word, definition string) error {
-    _, err := d.Search(word)
+	_, err := d.Search(word)
 
-    switch err {
-    case ErrNotFound:
-        d[word] = definition
-    case nil:
-        return ErrWordExists
-    default:
-        return err
-    }
+	switch err {
+	case ErrNotFound:
+		d[word] = definition
+	case nil:
+		return ErrWordExists
+	default:
+		return err
+	}
 
-    return nil
+	return nil
+}
+
+func (d Dictionary) Update(word, newDifinition string) error {
+	_, err := d.Search(word)
+
+	switch err {
+	case ErrNotFound:
+		return err
+	case nil:
+		d[word] = newDifinition
+	default:
+		return err
+	}
+
+	return nil
 }
