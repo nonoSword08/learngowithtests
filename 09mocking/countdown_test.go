@@ -5,15 +5,18 @@ import (
 	"testing"
 )
 
-func TestCountDown(t *testing.T) {
-	buffer := &bytes.Buffer{}
+func TestCountdown(t *testing.T) {
+    buffer := &bytes.Buffer{}
 
-	CountDown(buffer)
+    Countdown(buffer)
 
-	got := buffer.String()
-	want := "3"
+    got := buffer.String()
+    want := `3
+2
+1
+Go!`
 
-	if got != want {
-		t.Errorf("got %s want %s", got, want)
-	}
+    if got != want {
+        t.Errorf("got %q want %q", got, want)
+    }
 }
