@@ -6,24 +6,24 @@ import (
 )
 
 type Person struct {
-    Name    string
-    Profile Profile
+	Name    string
+	Profile Profile
 }
 
 type Profile struct {
-    Age  int
-    City string
+	Age  int
+	City string
 }
 
 func TestWalk(t *testing.T) {
 
-	cases := []struct{
-		Name string
-		Input interface{}
+	cases := []struct {
+		Name          string
+		Input         interface{}
 		ExpectedCalls []string
 	}{
 		{
-			"struct with one string field", 
+			"struct with one string field",
 			struct {
 				Name string
 			}{"Chris"},
@@ -48,7 +48,7 @@ func TestWalk(t *testing.T) {
 		{
 			"Nested fields",
 			Person{
-				"Chris", 
+				"Chris",
 				Profile{33, "London"},
 			},
 			[]string{"Chris", "London"},
@@ -71,7 +71,7 @@ func TestWalk(t *testing.T) {
 		},
 		{
 			"Arrays",
-			[2]Profile {
+			[2]Profile{
 				{33, "London"},
 				{34, "Reykjavík"},
 			},
@@ -97,26 +97,47 @@ func TestWalk(t *testing.T) {
 			"Foo": "Bar",
 			"Baz": "Boz",
 		}
-	
+
 		var got []string
 		walk(aMap, func(input string) {
 			got = append(got, input)
 		})
-	
+
 		assertContains(t, got, "Bar")
 		assertContains(t, got, "Boz")
 	})
+
+	t.Run("with channels", func(t *testing.T) {
+		aChannel := make(chan Profile)
+
+		go func() {
+			aChannel <- Profile{33, "Berlin"}
+			aChannel <- Profile{34, "Katowice"}
+			close(aChannel)
+		}()
+
+		var got []string
+		want := []string{"Berlin", "Katowice"}
+
+		walk(aChannel, func(input string) {
+			got = append(got, input)
+		})
+
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got %v, want %v", got, want)
+		}
+	})
 }
 
-func assertContains(t *testing.T, haystack []string, needle string)  {
-    t.Helper()
-    contains := false
-    for _, x := range haystack {
-        if x == needle {
-            contains = true
-        }
-    }
-    if !contains {
-        t.Errorf("expected %+v to contain %q but it didn't", haystack, needle)
-    }
+func assertContains(t *testing.T, haystack []string, needle string) {
+	t.Helper()
+	contains := false
+	for _, x := range haystack {
+		if x == needle {
+			contains = true
+		}
+	}
+	if !contains {
+		t.Errorf("expected %+v to contain %q but it didn't", haystack, needle)
+	}
 }
