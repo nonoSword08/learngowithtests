@@ -12,7 +12,7 @@ func TestCounter(t *testing.T) {
 		counter.Inc()
 		counter.Inc()
 
-		assertConuter(t, counter, 3)
+		assertConuter(t, &counter, 3)
 	})
 
 	t.Run("it runs safely concurrently", func(t *testing.T) {
@@ -30,11 +30,11 @@ func TestCounter(t *testing.T) {
 		}
 		wg.Wait()
 
-		assertConuter(t, counter, wantCount)
+		assertConuter(t, &counter, wantCount)
 	})
 }
 
-func assertConuter(t *testing.T, got Counter, want int) {
+func assertConuter(t *testing.T, got *Counter, want int) {
 	t.Helper()
 	if got.Value() != want {
 		t.Errorf("got %d want %d", got.Value(), want)
