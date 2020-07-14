@@ -7,6 +7,7 @@ import (
 	"testing"
 )
 
+// 测试时使用的存储得分结构体
 type StubPlayerStore struct {
 	scores map[string]int
 }
