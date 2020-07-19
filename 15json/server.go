@@ -1,13 +1,28 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 )
 
+// 玩家结构体
+type Player struct {
+	Name string
+	Wins int
+}
+
+// 数据查询接口
 type PlayerStore interface {
-	GetPlayerScore(name string) int
-	RecordWin(name string)
+	GetPlayerScore(name string) int // get一个玩家得分
+	RecordWin(name string)          // post记录一个玩家一次得分
+	GetLeague() []Player            // get所有玩家得分记录
+}
+
+// 服务类，包含数据查询和http服务
+type PlayerServer struct {
+	store PlayerStore
+	http.Handler
 }
 
 func NewPlayerServer(store PlayerStore) *PlayerServer {
@@ -24,13 +39,9 @@ func NewPlayerServer(store PlayerStore) *PlayerServer {
 	return p
 }
 
-type PlayerServer struct {
-	store PlayerStore
-	http.Handler
-}
-
 func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
+	w.Header().Set("content-type", "application/json")
+	json.NewEncoder(w).Encode(p.store.GetLeague())
 }
 
 func (p *PlayerServer) playersHandler(w http.ResponseWriter, r *http.Request) {
