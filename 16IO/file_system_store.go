@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"io"
 )
 
@@ -9,7 +10,7 @@ type FileSystemPlayerStore struct {
 }
 
 // 解析数据库中的存储的json数据并以Player列表的形式返回所有存储的数据
-func (f *FileSystemPlayerStore) GetLeague() []Player {
+func (f *FileSystemPlayerStore) GetLeague() League {
 	f.database.Seek(0, 0) // 每次读取时seek到文件开头处
 	league, _ := NewLeague(f.database)
 	return league
@@ -17,12 +18,34 @@ func (f *FileSystemPlayerStore) GetLeague() []Player {
 
 // 返回某位玩家的数据
 func (f *FileSystemPlayerStore) GetPlayerScore(name string) int {
-	var wins int
-	for _, player := range f.GetLeague() {
-		if player.Name == name {
-			wins = player.Wins
-			break
+	player := f.GetLeague().Find(name)
+	if player != nil {
+		return player.Wins
+	}
+	return 0
+}
+
+// 记录某位玩家得分
+func (f *FileSystemPlayerStore) RecordWin(name string) {
+	league := f.GetLeague()
+	player := league.Find(name)
+
+	if player != nil {
+		player.Wins++
+	}
+
+	f.database.Seek(0, 0)
+	json.NewEncoder(f.database).Encode(league)
+}
+
+// 得分列表包装类
+type League []Player
+
+func (l League) Find(name string) *Player {
+	for i, p := range l {
+		if p.Name==name {
+			return &l[i]
 		}
 	}
-	return wins
+	return nil
 }
