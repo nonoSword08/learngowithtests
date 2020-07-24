@@ -6,7 +6,7 @@ import (
 )
 
 type FileSystemPlayerStore struct {
-	database io.ReadWriteSeeker
+	database io.ReadWriteSeeker  // 此处使用一个文件作为database，测试用例中使用临时文件
 }
 
 // 解析数据库中的存储的json数据并以Player列表的形式返回所有存储的数据

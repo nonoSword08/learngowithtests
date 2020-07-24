@@ -1,4 +1,3 @@
-// server.go
 package main
 
 import (
@@ -7,20 +6,20 @@ import (
 	"net/http"
 )
 
-// PlayerStore stores score information about players
+// 玩家信息存储接口
 type PlayerStore interface {
     GetPlayerScore(name string) int
     RecordWin(name string)
-    GetLeague() []Player
+    GetLeague() League
 }
 
-// Player stores a name with a number of wins
+// 玩家结构体
 type Player struct {
     Name string
     Wins int
 }
 
-// PlayerServer is a HTTP interface for player information
+// HttpServer结构体，通过方法提升实现Serve方法
 type PlayerServer struct {
     store PlayerStore
     http.Handler
@@ -28,7 +27,7 @@ type PlayerServer struct {
 
 const jsonContentType = "application/json"
 
-// NewPlayerServer creates a PlayerServer with routing configured
+// PlayerServer构造方法
 func NewPlayerServer(store PlayerStore) *PlayerServer {
     p := new(PlayerServer)
 
