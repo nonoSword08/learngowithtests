@@ -14,7 +14,7 @@ func main() {
     if err != nil {
         log.Fatalf("open file fail %s", err)
     }
-    server := NewPlayerServer(&FileSystemPlayerStore{db})
+    server := NewPlayerServer(NewFileSystemPlayerStore(db))
 
     if err := http.ListenAndServe(":5000", server); err != nil {
         log.Fatalf("could not listen on port 5000 %v", err)
