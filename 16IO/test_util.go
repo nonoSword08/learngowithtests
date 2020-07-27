@@ -93,3 +93,11 @@ func getLeagueFromResponse(t *testing.T, body io.Reader) (league []Player) {
 
 	return
 }
+
+// err检查
+func assertNoError(t *testing.T, err error) {
+    t.Helper()
+    if err != nil {
+        t.Fatalf("didn't expect an error but got one, %v", err)
+    }
+}

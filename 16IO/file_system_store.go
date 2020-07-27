@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 )
 
@@ -10,14 +11,19 @@ type FileSystemPlayerStore struct {
 	league   League        // 临时将数据存储在内存中
 }
 
-func NewFileSystemPlayerStore(database *os.File) *FileSystemPlayerStore {
+func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
 	// 只读取一次文件，将json字符串保存在内存中，只在更新时将其写入文件
-	database.Seek(0, 0)
-	league, _ := NewLeague(database)
-	return &FileSystemPlayerStore{
-		database: json.NewEncoder(&tape{database}),
-		league:   league,
+	file.Seek(0, 0)
+	league, err := NewLeague(file)
+
+	if err != nil {
+		return nil, fmt.Errorf("problem loading player store from file %s, %v", file.Name(), err)
 	}
+
+	return &FileSystemPlayerStore{
+		database: json.NewEncoder(&tape{file}),
+		league:   league,
+	}, nil
 
 }
 
