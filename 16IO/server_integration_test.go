@@ -8,7 +8,7 @@ import (
 
 // 集成测试 直接使用正式结构体进行测试
 func TestRecordingWinsAndRetrievingThem(t *testing.T) {
-	database, cleanDatabase := createTempFile(t, "db")
+	database, cleanDatabase := createTempFile(t, "")
 	defer cleanDatabase()
 	store := NewFileSystemPlayerStore(database)
 	server := NewPlayerServer(store)

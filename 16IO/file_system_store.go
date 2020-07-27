@@ -3,19 +3,20 @@ package main
 import (
 	"encoding/json"
 	"io"
+	"os"
 )
 
 type FileSystemPlayerStore struct {
-	database io.ReadWriteSeeker // 此处使用一个文件作为database，测试用例中使用临时文件
-	league   League             // 临时将数据存储在内存中
+	database io.Writer // 此处使用一个文件作为database，测试用例中使用临时文件
+	league   League    // 临时将数据存储在内存中
 }
 
-func NewFileSystemPlayerStore(database io.ReadWriteSeeker) *FileSystemPlayerStore {
+func NewFileSystemPlayerStore(database *os.File) *FileSystemPlayerStore {
 	// 只读取一次文件，将json字符串保存在内存中，只在更新时将其写入文件
 	database.Seek(0, 0)
 	league, _ := NewLeague(database)
 	return &FileSystemPlayerStore{
-		database: database,
+		database: &tape{database},
 		league:   league,
 	}
 
@@ -38,14 +39,13 @@ func (f *FileSystemPlayerStore) GetPlayerScore(name string) int {
 // 记录某位玩家得分
 func (f *FileSystemPlayerStore) RecordWin(name string) {
 	player := f.league.Find(name)
-	
+
 	if player != nil {
 		player.Wins++
 	} else {
 		f.league = append(f.league, Player{name, 1})
 	}
 
-	f.database.Seek(0, 0)
 	json.NewEncoder(f.database).Encode(f.league)
 }
 

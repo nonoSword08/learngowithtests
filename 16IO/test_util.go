@@ -12,7 +12,7 @@ import (
 )
 
 // 创建一个临时文件，返回文件对象，用于存储数据
-func createTempFile(t *testing.T, initialData string) (io.ReadWriteSeeker, func()) {
+func createTempFile(t *testing.T, initialData string) (*os.File, func()) {
 	t.Helper()
 
 	tmpfile, err := ioutil.TempFile("", "db")
@@ -24,7 +24,7 @@ func createTempFile(t *testing.T, initialData string) (io.ReadWriteSeeker, func(
 	tmpfile.Write([]byte(initialData))
 
 	removeFile := func() {
-		// tmpfile.Close()
+		tmpfile.Close()
 		os.Remove(tmpfile.Name())
 	}
 
