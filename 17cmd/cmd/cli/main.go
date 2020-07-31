@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	poker "sgwt/17cmd"
 )
@@ -9,10 +10,14 @@ import (
 const dbFileName = "game.db.json"
 
 func main() {
+	store, close, err := poker.NewFileSystemPlayerStoreFromFile(dbFileName)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer close()
+
 	fmt.Println("Let's play poker")
 	fmt.Println("Type {Name} wins to record a win")
-	db, _ := os.OpenFile(dbFileName, os.O_RDWR|os.O_CREATE, 0666)
-	store, _ := poker.NewFileSystemPlayerStore(db)
-	game := poker.NewCLI(store, os.Stdin)
-	game.PlayPoker()
+	poker.NewCLI(store, os.Stdin).PlayPoker()
 }
