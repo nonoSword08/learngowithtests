@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
-	poker "sgwt/17cmd"
+	poker "sgwt/18time"
 )
 
 const dbFileName = "game.db.json"

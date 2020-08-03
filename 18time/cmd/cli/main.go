@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-	poker "sgwt/17cmd"
+	poker "sgwt/18time"
 )
 
 const dbFileName = "game.db.json"
