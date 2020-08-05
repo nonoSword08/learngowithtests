@@ -2,13 +2,27 @@ package poker
 
 import (
 	"bufio"
+	"fmt"
 	"io"
+	"os"
 	"strings"
 	"time"
 )
 
 type BlindAlerter interface {
 	ScheduleAlertAt(duration time.Duration, amount int)
+}
+
+type BlindAlerterFunc func(duration time.Duration, amount int)
+
+func (a BlindAlerterFunc) ScheduleAlertAt(duration time.Duration, amount int) {
+	a(duration, amount)
+}
+
+func StdOutAlerter(duration time.Duration, amount int) {
+	time.AfterFunc(duration, func() {
+		fmt.Fprintf(os.Stdout, "Blind is now %d\n", amount)
+	})
 }
 
 type CLI struct {
@@ -42,7 +56,7 @@ func (cli *CLI) scheduleBlindAlerts() {
 
 	for _, blind := range blinds {
 		cli.alerter.ScheduleAlertAt(blindTime, blind)
-		blindTime = blindTime + 10*time.Minute
+		blindTime = blindTime + 10*time.Second
 	}
 
 }
