@@ -16,12 +16,14 @@ type BlindAlerter interface {
 	ScheduleAlertAt(duration time.Duration, amount int)
 }
 
+// 接口实现类
 type BlindAlerterFunc func(duration time.Duration, amount int)
 
 func (a BlindAlerterFunc) ScheduleAlertAt(duration time.Duration, amount int) {
 	a(duration, amount)
 }
 
+// 用于构造接口实现类
 func StdOutAlerter(duration time.Duration, amount int) {
 	time.AfterFunc(duration, func() {
 		fmt.Fprintf(os.Stdout, "Blind is now %d\n", amount)
@@ -29,18 +31,19 @@ func StdOutAlerter(duration time.Duration, amount int) {
 }
 
 type CLI struct {
-	playerStore PlayerStore
-	in          *bufio.Scanner
-	out         io.Writer
-	alerter     BlindAlerter
+	in   *bufio.Scanner
+	out  io.Writer
+	game *Game
 }
 
 func NewCLI(store PlayerStore, in io.Reader, out io.Writer, alerter BlindAlerter) *CLI {
 	return &CLI{
-		playerStore: store,
-		in:          bufio.NewScanner(in),
-		out:         out,
-		alerter:     alerter,
+		in:  bufio.NewScanner(in),
+		out: out,
+		game: &Game{
+			alerter: alerter,
+			store:   store,
+		},
 	}
 }
 
@@ -50,29 +53,32 @@ func (cli *CLI) readLine() string {
 }
 
 func (cli *CLI) PlayPoker() {
+	// 提示用户输入玩家人数
 	fmt.Fprint(cli.out, PlayerPrompts)
-
+	// 读取用户输入的人数，转int
 	numberOfPlayers, _ := strconv.Atoi(cli.readLine())
-
-	cli.scheduleBlindAlerts(numberOfPlayers)
-
+	// 根据玩家人数来提醒下注
+	cli.game.Start(numberOfPlayers)
+	// 读取用户输入的赢家
 	userInput := cli.readLine()
-	cli.playerStore.RecordWin(extractWinner(userInput))
-}
-
-func (cli *CLI) scheduleBlindAlerts(numberOfPlayers int) {
-	blindIncrement := time.Duration(5+numberOfPlayers) * time.Minute
-
-	blinds := []int{100, 200, 300, 400, 500, 600, 800, 1000, 2000, 4000, 8000}
-	blindTime := 0 * time.Second
-
-	for _, blind := range blinds {
-		cli.alerter.ScheduleAlertAt(blindTime, blind)
-		blindTime = blindTime + blindIncrement
-	}
-
+	winner := extractWinner(userInput)
+	// 记录赢家
+	cli.game.store.RecordWin(winner)
 }
 
 func extractWinner(userInput string) string {
 	return strings.Replace(userInput, " wins", "", 1)
 }
+
+// func (cli *CLI) scheduleBlindAlerts(numberOfPlayers int) {
+// 	blindIncrement := time.Duration(5+numberOfPlayers) * time.Minute
+
+// 	blinds := []int{100, 200, 300, 400, 500, 600, 800, 1000, 2000, 4000, 8000}
+// 	blindTime := 0 * time.Second
+
+// 	for _, blind := range blinds {
+// 		cli.alerter.ScheduleAlertAt(blindTime, blind)
+// 		blindTime = blindTime + blindIncrement
+// 	}
+
+// }
